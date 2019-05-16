@@ -466,10 +466,23 @@ public class UserAccountController {
             User user = this.userRepository.returnUserFromDb(id);
 
             this.userRepository.saveUserInDb(this.userRepository.leaveConversation(user, conversationId));
-            
-        }
 
-
-        public void getAbandonedConversationsList (@RequestBody Map < String, Object > requestBody){
         }
     }
+
+    @GetMapping(value = "/getAbandonedConversationsList", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason = "User Left Conversation")
+    public List<String> getAbandonedConversationsList(@RequestBody Map<String, Object> requestBody) throws Exception {
+
+        if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
+
+
+            String id = (String) requestBody.get("id");
+
+
+            User user = this.userRepository.returnUserFromDb(id);
+            return this.userRepository.getAbandonedConversationsList(user);
+        }
+        return null;
+    }
+}

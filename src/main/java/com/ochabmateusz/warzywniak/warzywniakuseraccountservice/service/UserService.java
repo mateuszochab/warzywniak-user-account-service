@@ -397,6 +397,19 @@ public class UserService implements UserRepository {
 
     }
 
+    @Override
+    public List<String> getAbandonedConversationsList(User user) throws Exception {
+        List<String> conversationsList = user.getAbandonedConversations();
+
+        if (conversationsList.isEmpty()) {
+
+            throw new Exception("Abandoned Conversation List is empty");
+        }
+
+
+        return conversationsList;
+    }
+
 
 //PRIVATE METHODS
 

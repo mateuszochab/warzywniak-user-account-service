@@ -67,4 +67,6 @@ public interface UserRepository {
     User addConversation(User user, String conversationId);
 
     User leaveConversation(User user, String conversationId);
+
+    List<String> getAbandonedConversationsList(User user) throws Exception;
 }
