@@ -364,10 +364,10 @@ public class UserService implements UserRepository {
     }
 
     @Override
-    public List<String> getConversationsList(User user) throws Exception {
+    public Set<String> getConversationsList(User user) throws Exception {
 
 
-        List<String> conversationsList = user.getConversations();
+        Set<String> conversationsList = user.getConversations();
 
         if (conversationsList.isEmpty()) {
 
@@ -377,6 +377,13 @@ public class UserService implements UserRepository {
 
 
         return conversationsList;
+    }
+
+    @Override
+    public User addConversation(User user, String conversationId) {
+
+       user.getConversations().add(conversationId);
+       return user;
     }
 
 

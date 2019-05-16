@@ -12,6 +12,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @Document(collection = "wuser")
@@ -84,7 +85,7 @@ public class User {
 
     @Getter
     @Field(value = "conversations")
-    private List<String> conversations;
+    private Set<String> conversations;
 
     @Getter
     @Field(value = "abandonedConversations")

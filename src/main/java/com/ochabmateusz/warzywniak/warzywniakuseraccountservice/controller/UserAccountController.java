@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class UserAccountController {
@@ -401,7 +402,7 @@ public class UserAccountController {
 
     @PostMapping(value = "/rejectInvitation", headers = ACCEPT_JSON)
     @ResponseStatus(value = HttpStatus.OK, reason = "invitation rejected")
-    public List<String> rejectInvitation(@RequestBody Map<String, Object> requestBody) throws Exception {
+    public void rejectInvitation(@RequestBody Map<String, Object> requestBody) throws Exception {
 
         if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
 
@@ -418,34 +419,42 @@ public class UserAccountController {
 
         }
     }
-        @GetMapping(value = "/getConversationsList", headers = ACCEPT_JSON)
-        @ResponseStatus(value = HttpStatus.OK, reason = "Conversation List Returned")
-        public List<String> getConversationsList (@RequestBody Map < String, Object > requestBody) throws Exception {
 
-            if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
+    @GetMapping(value = "/getConversationsList", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason = "Conversation List Returned")
+    public Set<String> getConversationsList(@RequestBody Map<String, Object> requestBody) throws Exception {
 
-
-                String id = (String) requestBody.get("id");
+        if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
 
 
-                User user = this.userRepository.returnUserFromDb(id);
-                return this.userRepository.getConversationsList(user);
-            }
+            String id = (String) requestBody.get("id");
 
 
-            return null;
+            User user = this.userRepository.returnUserFromDb(id);
+            return this.userRepository.getConversationsList(user);
         }
 
 
+        return null;
+    }
+    @GetMapping(value = "/addConversation", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason = "Conversation has been added")
+    public void addConversation(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 
-        public void addConversation (@RequestBody Map < String, Object > requestBody){
+        if (this.validationRepository.twoValidItemsInRequest("id", "conversationId", requestBody)) {
+
+            String id = (String) requestBody.get("id");
+            String conversationId = (String) requestBody.get("conversationId");
+
+            User user = this.userRepository.returnUserFromDb(id);
+
+            this.userRepository.saveUserInDb(this.userRepository.addConversation(user, conversationId));
+
         }
 
-        public void closeConversation (@RequestBody Map < String, Object > requestBody){
+        public void leaveConversation (@RequestBody Map < String, Object > requestBody){
         }
 
-        public void getUsersList (@RequestBody Map < String, Object > requestBody){
-        }
 
         public void getAbandonedConversationsList (@RequestBody Map < String, Object > requestBody){
         }

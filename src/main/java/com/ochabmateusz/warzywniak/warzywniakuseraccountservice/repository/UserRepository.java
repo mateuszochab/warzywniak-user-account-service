@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public interface UserRepository {
@@ -61,5 +62,7 @@ public interface UserRepository {
 
     Map<String, User> rejectInvitation(User me, User friend) throws Exception;
 
-    List<String> getConversationsList(User user) throws Exception;
+    Set<String> getConversationsList(User user) throws Exception;
+
+    User addConversation(User user, String conversationId);
 }
