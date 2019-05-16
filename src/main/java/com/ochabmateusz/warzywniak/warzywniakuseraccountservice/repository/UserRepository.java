@@ -60,4 +60,6 @@ public interface UserRepository {
     Map<String, User> quitFriendship(User me, User friend);
 
     Map<String, User> rejectInvitation(User me, User friend) throws Exception;
+
+    List<String> getConversationsList(User user) throws Exception;
 }

@@ -334,13 +334,13 @@ public class UserAccountController {
     public void confirmFriendRequest(@RequestBody Map<String, Object> requestBody) {
 
 
-
     }
-@PostMapping(value = "/sendFriendRequest", headers = ACCEPT_JSON)
-@ResponseStatus(value = HttpStatus.OK, reason="Request of being friend has been successfully sent")
+
+    @PostMapping(value = "/sendFriendRequest", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason = "Request of being friend has been successfully sent")
     public void sendFriendRequest(@RequestBody Map<String, Object> requestBody) throws Exception {
 
-        if (this.validationRepository.twoValidItemsInRequest("Myid","requestFriendId", requestBody)) {
+        if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
 
             String Myid = (String) requestBody.get("Myid");
             String requestFriendId = (String) requestBody.get("requestFriendId");
@@ -356,9 +356,10 @@ public class UserAccountController {
 
         }
     }
+
     @PostMapping(value = "/removeInvitationToFriend", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason="Invitation successfully canceled")
-        public void removeInvitationToFriend(@RequestBody Map<String, Object> requestBody) throws Exception {
+    @ResponseStatus(value = HttpStatus.OK, reason = "Invitation successfully canceled")
+    public void removeInvitationToFriend(@RequestBody Map<String, Object> requestBody) throws Exception {
 
         if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
 
@@ -378,31 +379,31 @@ public class UserAccountController {
 
 
     @PostMapping(value = "/quitFriendship", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason="friendship has been ended successfully :)")
-        public void quitFriendship(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
+    @ResponseStatus(value = HttpStatus.OK, reason = "friendship has been ended successfully :)")
+    public void quitFriendship(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 
 
-            if (this.validationRepository.twoValidItemsInRequest("Myid","requestFriendId", requestBody)) {
+        if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
 
-                String Myid = (String) requestBody.get("Myid");
-                String requestFriendId = (String) requestBody.get("requestFriendId");
+            String Myid = (String) requestBody.get("Myid");
+            String requestFriendId = (String) requestBody.get("requestFriendId");
 
 
+            User me = this.userRepository.returnUserFromDb(Myid);
+            User friend = this.userRepository.returnUserFromDb(requestFriendId);
 
-                User me = this.userRepository.returnUserFromDb(Myid);
-                User friend = this.userRepository.returnUserFromDb(requestFriendId);
-
-                Map<String, User> map = this.userRepository.quitFriendship(me, friend);
-                this.userRepository.saveUserInDb(map.get("me"));
-                this.userRepository.saveUserInDb(map.get("friend"));
+            Map<String, User> map = this.userRepository.quitFriendship(me, friend);
+            this.userRepository.saveUserInDb(map.get("me"));
+            this.userRepository.saveUserInDb(map.get("friend"));
 
         }
-        }
+    }
+
     @PostMapping(value = "/rejectInvitation", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason="invitation rejected")
-        public void rejectInvitation(@RequestBody Map<String, Object> requestBody) throws Exception {
+    @ResponseStatus(value = HttpStatus.OK, reason = "invitation rejected")
+    public List<String> rejectInvitation(@RequestBody Map<String, Object> requestBody) throws Exception {
 
-        if (this.validationRepository.twoValidItemsInRequest("Myid","requestFriendId", requestBody)) {
+        if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
 
             String Myid = (String) requestBody.get("Myid");
             String requestFriendId = (String) requestBody.get("requestFriendId");
@@ -416,19 +417,36 @@ public class UserAccountController {
 
 
         }
-
-
-    public void getConversationsList(@RequestBody Map<String, Object> requestBody) {
     }
+        @GetMapping(value = "/getConversationsList", headers = ACCEPT_JSON)
+        @ResponseStatus(value = HttpStatus.OK, reason = "Conversation List Returned")
+        public List<String> getConversationsList (@RequestBody Map < String, Object > requestBody) throws Exception {
 
-    public void addConversation(@RequestBody Map<String, Object> requestBody) {
+            if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
+
+
+                String id = (String) requestBody.get("id");
+
+
+                User user = this.userRepository.returnUserFromDb(id);
+                return this.userRepository.getConversationsList(user);
+            }
+
+
+            return null;
+        }
+
+
+
+        public void addConversation (@RequestBody Map < String, Object > requestBody){
+        }
+
+        public void closeConversation (@RequestBody Map < String, Object > requestBody){
+        }
+
+        public void getUsersList (@RequestBody Map < String, Object > requestBody){
+        }
+
+        public void getAbandonedConversationsList (@RequestBody Map < String, Object > requestBody){
+        }
     }
-
-    public void closeConversation(@RequestBody Map<String, Object> requestBody) {
-    }
-
-    public void getUsersList(@RequestBody Map<String, Object> requestBody) {
-    }
-
-    public void getAbandonedConversationsList(@RequestBody Map<String , Object> requestBody){}
-}

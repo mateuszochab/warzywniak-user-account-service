@@ -363,6 +363,22 @@ public class UserService implements UserRepository {
 
     }
 
+    @Override
+    public List<String> getConversationsList(User user) throws Exception {
+
+
+        List<String> conversationsList = user.getConversations();
+
+        if (conversationsList.isEmpty()) {
+
+            throw new Exception("User does not run any conversation");
+        }
+
+
+
+        return conversationsList;
+    }
+
 
 //PRIVATE METHODS
 
