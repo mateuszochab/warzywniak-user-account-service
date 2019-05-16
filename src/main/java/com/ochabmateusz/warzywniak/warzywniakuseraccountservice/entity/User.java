@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.util.List;
+import java.util.Map;
 
 
 @Document(collection = "wuser")
@@ -57,12 +58,15 @@ public class User {
 
     @Getter
     @Field(value = "requestConnectionFriendList")
-    private List requestConnectionFriendList;
+    private Map<Friend,String> requestConnectionFriendList;
 
     @Getter
     @Field(value = "sendInvitationToFriendList")
-    private List<Friend> sendInvitationToFriendList;
+    private Map<Friend,String> sendInvitationToFriendList;
 
+
+    @Field(value = "notFriendAnyLongerList")
+    private List<Friend> notFriendAnyLongerList;
 
     @Getter
     @Field(value = "createdDate")

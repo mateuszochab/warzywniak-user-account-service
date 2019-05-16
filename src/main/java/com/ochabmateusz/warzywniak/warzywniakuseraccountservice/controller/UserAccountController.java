@@ -332,13 +332,41 @@ public class UserAccountController {
     }
 
     public void confirmFriendRequest(@RequestBody Map<String, Object> requestBody) {
-    }
 
-    public void sendFriendRequest(@RequestBody Map<String, Object> requestBody) {
-    }
 
+
+    }
+@PostMapping(value = "/sendFriendRequest", headers = ACCEPT_JSON)
+@ResponseStatus(value = HttpStatus.OK, reason="Request of being friend has been successfully sent")
+    public void sendFriendRequest(@RequestBody Map<String, Object> requestBody) throws Exception {
+
+        if (this.validationRepository.oneValidItemsInRequest("Myid", requestBody)) {
+
+            String Myid = (String) requestBody.get("Myid");
+            String requestFriendId = (String) requestBody.get("requestFriendId");
+
+            User me = this.userRepository.returnUserFromDb(Myid);
+            User friend = this.userRepository.returnUserFromDb(requestFriendId);
+
+
+            Map<String, User> map = this.userRepository.sendFriendRequest(me, friend);
+            this.userRepository.saveUserInDb(map.get("me"));
+            this.userRepository.saveUserInDb(map.get("friend"));
+
+
+        }
+    }
     public void receiveFriendInvitation(@RequestBody Map<String, Object> requestBody) {
     }
+        public void removeInvitationToFriend(@RequestBody Map<String, Object> requestBody) {
+        }
+
+        public void quitBeingFriendWithUser(@RequestBody Map<String, Object> requestBody) {
+        }
+
+        public void declineBeingFriendWithUser(@RequestBody Map<String, Object> requestBody) {
+        }
+
 
     public void getConversationsList(@RequestBody Map<String, Object> requestBody) {
     }

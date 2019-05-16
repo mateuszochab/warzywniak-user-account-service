@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -219,8 +216,35 @@ public class UserService implements UserRepository {
         return listOfFriendsIDs.isEmpty() ? null : listOfFriendsIDs;
     }
 
+    @Override
+    public Map<String, User> sendFriendRequest(User me, User friend) throws Exception {
+        String friendId = friend.getId();
+        String myId = friend.getId();
+        if (!me.getSendInvitationToFriendList().isEmpty() && !me.getSendInvitationToFriendList().entrySet().stream()
+                .map(item -> item.getKey())
+                .filter(key -> key.getIdConnectedFriend().equals(friendId))
+                .collect(Collectors.toList())
+                .isEmpty()) {
+            throw new Exception("Invitation to this user has been already sent");
+        }
+        if (me.getListOfConnectedFriends().stream()
+                .filter(key -> key.getIdConnectedFriend().equals(friendId))
+                .map(Friend::getIdConnectedFriend)
+                .collect(Collectors.toList())
+                .isEmpty()) {
+
+            throw new Exception(("You are already friends"));
 
 
+        }
+        String date=setDate();
+        me.getSendInvitationToFriendList().put(new Friend(friendId, false, null, null),date);
+        friend.getRequestConnectionFriendList().put(new Friend(myId,false,null,null),date);
+
+        return  Map.of("me",me,"friend",friend);
+
+
+    }
 
 
 //PRIVATE METHODS

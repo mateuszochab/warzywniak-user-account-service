@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public interface UserRepository {
@@ -51,4 +52,6 @@ public interface UserRepository {
     User findUserByEmail(String email) throws NotFoundException;
 
     List<String> getUserFriendList(User user);
+
+    Map<String, User> sendFriendRequest(User me, User friend) throws Exception;
 }

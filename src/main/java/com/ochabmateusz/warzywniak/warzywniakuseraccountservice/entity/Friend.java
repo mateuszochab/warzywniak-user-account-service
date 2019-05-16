@@ -17,4 +17,10 @@ public class Friend {
 
     @Field(value = "connected")
     private boolean connected;
+
+    @Field(value = "startBeingFriendDate")
+    private String startBeingFriendDate;
+
+    @Field(value = "stopBeingFriendDate")
+    private String stopBeingFriendDate;
 }
