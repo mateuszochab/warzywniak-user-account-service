@@ -12,6 +12,7 @@ public enum ModificationType {
     COMPANY_NAME,
     ADD_PRODUCT_TYPE,
     REMOVE_PRODUCT_TYPE,
+    FRIENDSHIP_CANCELED,
     ROLE,
     LOCATION_STREET,
     LOCATION_CITY,

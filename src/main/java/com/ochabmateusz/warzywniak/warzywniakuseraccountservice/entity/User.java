@@ -58,13 +58,14 @@ public class User {
 
     @Getter
     @Field(value = "requestConnectionFriendList")
-    private Map<Friend,String> requestConnectionFriendList;
+    private Map<Friend, String> requestConnectionFriendList;
 
     @Getter
     @Field(value = "sendInvitationToFriendList")
-    private Map<Friend,String> sendInvitationToFriendList;
+    private Map<Friend, String> sendInvitationToFriendList;
 
-
+    @Getter
+    @Setter
     @Field(value = "notFriendAnyLongerList")
     private List<Friend> notFriendAnyLongerList;
 

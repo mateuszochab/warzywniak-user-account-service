@@ -360,22 +360,43 @@ public class UserAccountController {
     @ResponseStatus(value = HttpStatus.OK, reason="Invitation successfully canceled")
         public void removeInvitationToFriend(@RequestBody Map<String, Object> requestBody) throws Exception {
 
+        if (this.validationRepository.twoValidItemsInRequest("Myid", "requestFriendId", requestBody)) {
+
+            String Myid = (String) requestBody.get("Myid");
+            String requestFriendId = (String) requestBody.get("requestFriendId");
+
+            User me = this.userRepository.returnUserFromDb(Myid);
+            User friend = this.userRepository.returnUserFromDb(requestFriendId);
+
+            Map<String, User> map = this.userRepository.removeInvitationToFriend(me, friend);
+            this.userRepository.saveUserInDb(map.get("me"));
+            this.userRepository.saveUserInDb(map.get("friend"));
+
+
+        }
+    }
+
+
+    @PostMapping(value = "/quitFriendship", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason="friendship has been ended successfully :)")
+        public void quitFriendship(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
+
+
             if (this.validationRepository.twoValidItemsInRequest("Myid","requestFriendId", requestBody)) {
 
                 String Myid = (String) requestBody.get("Myid");
                 String requestFriendId = (String) requestBody.get("requestFriendId");
 
+
+
                 User me = this.userRepository.returnUserFromDb(Myid);
                 User friend = this.userRepository.returnUserFromDb(requestFriendId);
 
-                Map<String, User> map = this.userRepository.removeInvitationToFriend(me, friend);
+                Map<String, User> map = this.userRepository.quitFriendship(me, friend);
                 this.userRepository.saveUserInDb(map.get("me"));
                 this.userRepository.saveUserInDb(map.get("friend"));
 
-
-    }
-
-        public void quitBeingFriendWithUser(@RequestBody Map<String, Object> requestBody) {
+        }
         }
 
         public void declineBeingFriendWithUser(@RequestBody Map<String, Object> requestBody) {

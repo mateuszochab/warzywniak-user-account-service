@@ -237,11 +237,11 @@ public class UserService implements UserRepository {
 
 
         }
-        String date=setDate();
-        me.getSendInvitationToFriendList().put(new Friend(friendId, false, null, null),date);
-        friend.getRequestConnectionFriendList().put(new Friend(myId,false,null,null),date);
+        String date = setDate();
+        me.getSendInvitationToFriendList().put(new Friend(friendId, false, null, null), date);
+        friend.getRequestConnectionFriendList().put(new Friend(myId, false, null, null), date);
 
-        return  Map.of("me",me,"friend",friend);
+        return Map.of("me", me, "friend", friend);
 
 
     }
@@ -257,7 +257,8 @@ public class UserService implements UserRepository {
                 .collect(Collectors.toList())
                 .isEmpty()) {
             throw new Exception("Invitation unavailable");
-        } if (friend.getRequestConnectionFriendList().entrySet().stream()
+        }
+        if (friend.getRequestConnectionFriendList().entrySet().stream()
                 .map(key -> key.getKey())
                 .filter(key -> key.getIdConnectedFriend().equals(myId))
                 .collect(Collectors.toList())
@@ -267,11 +268,69 @@ public class UserService implements UserRepository {
         }
 
 
-        me.getSendInvitationToFriendList().remove(new Friend(friendId,false,null,null));
-        friend.getRequestConnectionFriendList().remove(new Friend(myId,false,null,null));
+        me.getSendInvitationToFriendList().remove(new Friend(friendId, false, null, null));
+        friend.getRequestConnectionFriendList().remove(new Friend(myId, false, null, null));
 
-        return  Map.of("me",me,"friend",friend);
+        return Map.of("me", me, "friend", friend);
 
+    }
+
+    @Override
+    public Map<String, User> quitFriendship(User me, User friend) {
+
+
+        String friendId = friend.getId();
+        String myId = friend.getId();
+
+//My profile
+        //get friend from ListOfConnectedFriend
+        Friend meToNoFriendsAnyLongerList=me.getListOfConnectedFriends()
+                .stream()
+                .filter(item->item.getIdConnectedFriend().equals(friendId))
+                .findAny()
+                .get();
+        //setting connection to false and ending date
+        meToNoFriendsAnyLongerList.setConnected(false);
+        meToNoFriendsAnyLongerList.setStopBeingFriendDate(setDate());
+
+        //add friend to list of former friends
+        me.getNotFriendAnyLongerList().add(meToNoFriendsAnyLongerList);
+
+        //remove friend from list of active friends
+        me.getListOfConnectedFriends().removeIf(item-> item.getIdConnectedFriend().equals(friendId));
+
+        //add modification type to list
+        me.getModifiedDates().add(new ModifiedDate(setDate(),ModificationType.FRIENDSHIP_CANCELED));
+
+
+
+//Friend profile
+
+        //get friend from ListOfConnectedFriend
+        Friend friendToNoFriendsAnyLongerList=me.getListOfConnectedFriends()
+                .stream()
+                .filter(item->item.getIdConnectedFriend().equals(myId))
+                .findAny()
+                .get();
+
+        //setting connection to false and ending date
+        friendToNoFriendsAnyLongerList.setConnected(false);
+        friendToNoFriendsAnyLongerList.setStopBeingFriendDate(setDate());
+
+        //add friend to list of former friends
+        friend.getNotFriendAnyLongerList().add(friendToNoFriendsAnyLongerList);
+
+        //remove friend from list of active friends
+        friend.getListOfConnectedFriends().removeIf(item-> item.getIdConnectedFriend().equals(myId));
+
+        //add modification type to list
+        friend.getModifiedDates().add(new ModifiedDate(setDate(),ModificationType.FRIENDSHIP_CANCELED));
+
+
+
+
+
+        return Map.of("me", me, "friend", friend);
     }
 
 
@@ -288,7 +347,7 @@ public class UserService implements UserRepository {
     //calculate future date based on starts date
     private String calculateDateOfPremiumEnd(String startDate, int daysInFuture) throws ParseException {
         //new Calendar object
-        Calendar c = Calendar.getInstance();
+        Calendar c;
 
         //parse string startDate to Date object with given pattern
         Date start = stringDateToDateObject(startDate);
