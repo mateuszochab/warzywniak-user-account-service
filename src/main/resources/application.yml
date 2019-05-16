@@ -1,0 +1,15 @@
+---
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: "https://partridge-eureka-server.cfapps.io/eureka/"
+server:
+  port: 9700
+spring:
+  application:
+    name: warzywniak-user-account-service
+  data:
+    mongodb:
+      database: usersDB
+      host: localhost
+      port: 27017
