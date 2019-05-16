@@ -280,13 +280,13 @@ public class UserService implements UserRepository {
 
 
         String friendId = friend.getId();
-        String myId = friend.getId();
+        String myId = me.getId();
 
 //My profile
         //get friend from ListOfConnectedFriend
-        Friend meToNoFriendsAnyLongerList=me.getListOfConnectedFriends()
+        Friend meToNoFriendsAnyLongerList = me.getListOfConnectedFriends()
                 .stream()
-                .filter(item->item.getIdConnectedFriend().equals(friendId))
+                .filter(item -> item.getIdConnectedFriend().equals(friendId))
                 .findAny()
                 .get();
         //setting connection to false and ending date
@@ -297,19 +297,18 @@ public class UserService implements UserRepository {
         me.getNotFriendAnyLongerList().add(meToNoFriendsAnyLongerList);
 
         //remove friend from list of active friends
-        me.getListOfConnectedFriends().removeIf(item-> item.getIdConnectedFriend().equals(friendId));
+        me.getListOfConnectedFriends().removeIf(item -> item.getIdConnectedFriend().equals(friendId));
 
         //add modification type to list
-        me.getModifiedDates().add(new ModifiedDate(setDate(),ModificationType.FRIENDSHIP_CANCELED));
-
+        me.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.FRIENDSHIP_CANCELED));
 
 
 //Friend profile
 
         //get friend from ListOfConnectedFriend
-        Friend friendToNoFriendsAnyLongerList=me.getListOfConnectedFriends()
+        Friend friendToNoFriendsAnyLongerList = me.getListOfConnectedFriends()
                 .stream()
-                .filter(item->item.getIdConnectedFriend().equals(myId))
+                .filter(item -> item.getIdConnectedFriend().equals(myId))
                 .findAny()
                 .get();
 
@@ -321,16 +320,47 @@ public class UserService implements UserRepository {
         friend.getNotFriendAnyLongerList().add(friendToNoFriendsAnyLongerList);
 
         //remove friend from list of active friends
-        friend.getListOfConnectedFriends().removeIf(item-> item.getIdConnectedFriend().equals(myId));
+        friend.getListOfConnectedFriends().removeIf(item -> item.getIdConnectedFriend().equals(myId));
 
         //add modification type to list
-        friend.getModifiedDates().add(new ModifiedDate(setDate(),ModificationType.FRIENDSHIP_CANCELED));
-
-
-
+        friend.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.FRIENDSHIP_CANCELED));
 
 
         return Map.of("me", me, "friend", friend);
+    }
+
+    @Override
+    public Map<String, User> rejectInvitation(User me, User friend) throws Exception {
+
+        String friendId = friend.getId();
+        String myId = me.getId();
+
+        List<Friend> meRequestConnectionFriendList = me.getRequestConnectionFriendList().entrySet().stream()
+                .map(item -> item.getKey())
+                .filter(key -> key.getIdConnectedFriend().equals(friendId))
+                .collect(Collectors.toList());
+
+        List<Friend> friendSendInvitationToFriendList = friend.getSendInvitationToFriendList().entrySet().stream()
+                .map(item -> item.getKey())
+                .filter(key -> key.getIdConnectedFriend().equals(myId))
+                .collect(Collectors.toList());
+
+        if (!me.getRequestConnectionFriendList().isEmpty() && !meRequestConnectionFriendList.isEmpty()) {
+            throw new Exception("Invitation unavailable");
+        }
+        if (!friend.getSendInvitationToFriendList().isEmpty() && !friendSendInvitationToFriendList.isEmpty()) {
+            throw new Exception("Invitation unavailable");
+        }
+
+
+        me.getRequestConnectionFriendList().remove(meRequestConnectionFriendList);
+
+        friend.getSendInvitationToFriendList().remove(friendSendInvitationToFriendList);
+
+
+        return Map.of("me", me, "friend", friend);
+
+
     }
 
 

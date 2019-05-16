@@ -398,8 +398,23 @@ public class UserAccountController {
 
         }
         }
+    @PostMapping(value = "/rejectInvitation", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason="invitation rejected")
+        public void rejectInvitation(@RequestBody Map<String, Object> requestBody) throws Exception {
 
-        public void declineBeingFriendWithUser(@RequestBody Map<String, Object> requestBody) {
+        if (this.validationRepository.twoValidItemsInRequest("Myid","requestFriendId", requestBody)) {
+
+            String Myid = (String) requestBody.get("Myid");
+            String requestFriendId = (String) requestBody.get("requestFriendId");
+
+            User me = this.userRepository.returnUserFromDb(Myid);
+            User friend = this.userRepository.returnUserFromDb(requestFriendId);
+
+            Map<String, User> map = this.userRepository.rejectInvitation(me, friend);
+            this.userRepository.saveUserInDb(map.get("me"));
+            this.userRepository.saveUserInDb(map.get("friend"));
+
+
         }
 
 
