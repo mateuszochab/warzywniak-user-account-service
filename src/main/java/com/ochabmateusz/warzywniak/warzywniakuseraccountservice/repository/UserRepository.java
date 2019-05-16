@@ -54,4 +54,6 @@ public interface UserRepository {
     List<String> getUserFriendList(User user);
 
     Map<String, User> sendFriendRequest(User me, User friend) throws Exception;
+
+    Map<String, User> removeInvitationToFriend(User me, User friend) throws Exception;
 }

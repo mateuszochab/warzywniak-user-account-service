@@ -246,6 +246,34 @@ public class UserService implements UserRepository {
 
     }
 
+    @Override
+    public Map<String, User> removeInvitationToFriend(User me, User friend) throws Exception {
+
+        String friendId = friend.getId();
+        String myId = friend.getId();
+        if (!me.getSendInvitationToFriendList().isEmpty() && !me.getSendInvitationToFriendList().entrySet().stream()
+                .map(item -> item.getKey())
+                .filter(key -> key.getIdConnectedFriend().equals(friendId))
+                .collect(Collectors.toList())
+                .isEmpty()) {
+            throw new Exception("Invitation unavailable");
+        } if (friend.getRequestConnectionFriendList().entrySet().stream()
+                .map(key -> key.getKey())
+                .filter(key -> key.getIdConnectedFriend().equals(myId))
+                .collect(Collectors.toList())
+                .isEmpty()) {
+
+            throw new Exception(("Invitation unavailable- friend probably has accepted your invitation"));
+        }
+
+
+        me.getSendInvitationToFriendList().remove(new Friend(friendId,false,null,null));
+        friend.getRequestConnectionFriendList().remove(new Friend(myId,false,null,null));
+
+        return  Map.of("me",me,"friend",friend);
+
+    }
+
 
 //PRIVATE METHODS
 
