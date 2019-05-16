@@ -437,6 +437,7 @@ public class UserAccountController {
 
         return null;
     }
+
     @GetMapping(value = "/addConversation", headers = ACCEPT_JSON)
     @ResponseStatus(value = HttpStatus.OK, reason = "Conversation has been added")
     public void addConversation(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
@@ -451,8 +452,21 @@ public class UserAccountController {
             this.userRepository.saveUserInDb(this.userRepository.addConversation(user, conversationId));
 
         }
+    }
 
-        public void leaveConversation (@RequestBody Map < String, Object > requestBody){
+    @GetMapping(value = "/leaveConversation", headers = ACCEPT_JSON)
+    @ResponseStatus(value = HttpStatus.OK, reason = "User Left Conversation")
+    public void leaveConversation(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
+
+        if (this.validationRepository.twoValidItemsInRequest("id", "conversationId", requestBody)) {
+
+            String id = (String) requestBody.get("id");
+            String conversationId = (String) requestBody.get("conversationId");
+
+            User user = this.userRepository.returnUserFromDb(id);
+
+            this.userRepository.saveUserInDb(this.userRepository.leaveConversation(user, conversationId));
+            
         }
 
 

@@ -375,15 +375,26 @@ public class UserService implements UserRepository {
         }
 
 
-
         return conversationsList;
     }
 
     @Override
     public User addConversation(User user, String conversationId) {
 
-       user.getConversations().add(conversationId);
-       return user;
+        user.getConversations().add(conversationId);
+        return user;
+    }
+
+    @Override
+    public User leaveConversation(User user, String conversationId) {
+        user.getAbandonedConversations().add(user.getConversations().stream()
+                .filter(item -> item.equals(conversationId))
+                .findAny()
+                .get());
+
+        user.getConversations().remove(conversationId);
+        return user;
+
     }
 
 

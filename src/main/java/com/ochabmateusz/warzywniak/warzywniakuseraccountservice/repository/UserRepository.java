@@ -65,4 +65,6 @@ public interface UserRepository {
     Set<String> getConversationsList(User user) throws Exception;
 
     User addConversation(User user, String conversationId);
+
+    User leaveConversation(User user, String conversationId);
 }
