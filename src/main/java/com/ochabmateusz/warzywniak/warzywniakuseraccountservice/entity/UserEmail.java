@@ -35,7 +35,7 @@ public class UserEmail {
     @Getter
     @Pattern(regexp = "^[A-Za-z0-9._%-+]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}", message = "enter valid email adress")
     @Field(value = "waitingEmail")
-    private String waitingEmail = null;
+    private String waitingEmail ;
 
 
     @Setter

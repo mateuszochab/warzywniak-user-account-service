@@ -1,8 +1,6 @@
 package com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.EnumType;
@@ -15,6 +13,8 @@ import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Location {
 
 
@@ -23,7 +23,7 @@ public class Location {
     @Size(min = 2, message = "City should have atleast 2 characters")
     @Pattern(regexp = "^[a-zA-Z]*$", message = "Accept only uppercase lowercase characters")
     @Field(value = "city")
-    private  String city;
+    private String city;
 
     @NonNull
     @NotEmpty
@@ -32,27 +32,34 @@ public class Location {
     private Coordinates coordinates;
 
 
-
     @Field(value = "street")
     @Pattern(regexp = "^[a-zA-Z]*$", message = "Accept only uppercase lowercase characters")
-    private String street=null;
+    private String street = null;
 
 
     @Field(value = "numberOfHouse")
-    private int numberOfHouse=0;
+    private int numberOfHouse = 0;
 
     @Field(value = "country")
     @Enumerated(EnumType.STRING)
-    private Country country=Country.INITIAL;
+    private Country country = Country.INITIAL;
 
     @Field(value = "voivodeship")
     @Enumerated(EnumType.STRING)
-    private Voivodeship voivodeship=Voivodeship.INITIAL;
+    private Voivodeship voivodeship = Voivodeship.INITIAL;
 
 
     @Field(value = "typeOfProduct")
     @Enumerated(EnumType.STRING)
     private List<TypeOfProduct> typeOfProduct;
 
-
+    public Location(@NonNull @NotEmpty @Size(min = 2, message = "City should have atleast 2 characters")
+                    @Pattern(regexp = "^[a-zA-Z]*$", message = "Accept only uppercase lowercase characters") String city,
+                    @NonNull @NotEmpty @Valid Coordinates coordinates, @Pattern(regexp = "^[a-zA-Z]*$",
+            message = "Accept only uppercase lowercase characters") String street, int numberOfHouse) {
+        this.city = city;
+        this.coordinates = coordinates;
+        this.street = street;
+        this.numberOfHouse = numberOfHouse;
+    }
 }

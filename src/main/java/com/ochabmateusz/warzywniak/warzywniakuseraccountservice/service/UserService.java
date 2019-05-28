@@ -5,7 +5,9 @@ import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.repository.UserR
 import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.repository.WuserMongoRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,12 +29,13 @@ public class UserService implements UserRepository {
 
     //Find and return User from database
     @Override
-    public User returnUserFromDb(String id) throws NotFoundException {
+    public User returnUserFromDb(String id) {
         Optional<User> user = this.wuserMongoRepository.findById(id);
         if (user.isPresent()) {
             return user.get();
         } else {
-            throw new NotFoundException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User Not Found");
+
         }
     }
 
@@ -110,10 +113,10 @@ public class UserService implements UserRepository {
 
     //returns active email
     @Override
-    public String getActiveEmail(String id) throws Exception {
-        User user = returnUserFromDb(id);
+    public String getActiveEmail(User user) throws Exception {
+
         String activeEmail = user.getUserBase().getUserEmail().getActiveEmail();
-        if (activeEmail.isEmpty()) {
+        if (activeEmail==null) {
             throw new Exception("There is no active email");
         }
 
@@ -145,11 +148,15 @@ public class UserService implements UserRepository {
     @Override
     public User confirmEmail(User user, String email) throws Exception {
 
+        String activeEmail=user.getUserBase().getUserEmail().getActiveEmail();
+
+
         if (user.getUserBase().getUserEmail().getWaitingEmail().equals(email)) {
-            user.getUserBase().getUserEmail().getListOfPreviousEmails().add(getActiveEmail(user.getId()));
+            user.getUserBase().getUserEmail().getListOfPreviousEmails().add(activeEmail);
             user.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.EMAIL_ARCHIVED));
             user.getUserBase().getUserEmail().setActiveEmail(email);
             user.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.ACTIVE_EMAIL_CHANGED));
+            user.getUserBase().getUserEmail().setWaitingEmail(null);
             return user;
 
         } else {
@@ -163,13 +170,14 @@ public class UserService implements UserRepository {
     }
 
     @Override
-    public void activatePremium(User user) throws ParseException {
+    public User activatePremium(User user) throws ParseException {
 
         String startDate = setDate();
 
         user.getPremium().setActive(true);
         user.getPremium().setStartDatePremium(startDate);
         user.getPremium().setEndDatePremium(calculateDateOfPremiumEnd(startDate, 30));
+        return user;
     }
 
     @Override

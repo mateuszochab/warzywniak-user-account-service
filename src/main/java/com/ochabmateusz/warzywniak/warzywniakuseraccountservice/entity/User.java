@@ -1,8 +1,9 @@
 package com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity;
 
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+@AllArgsConstructor
+@NoArgsConstructor
 @Document(collection = "wuser")
 public class User {
     //Fields
@@ -25,7 +27,7 @@ public class User {
     private String id;
 
 
-    @Setter
+
     @Getter
     @Field(value = "userBase")
     private UserBase userBase;

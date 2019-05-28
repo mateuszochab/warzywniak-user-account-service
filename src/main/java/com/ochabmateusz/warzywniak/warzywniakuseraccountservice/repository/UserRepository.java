@@ -34,7 +34,9 @@ public interface UserRepository {
 
     List<TypeOfProduct> getProductTypeList(User user);
 
-    String getActiveEmail(String id) throws Exception;
+
+    //returns active email
+    String getActiveEmail(User user) throws Exception;
 
     User addNewEmail(User user, String email);
 
@@ -44,7 +46,7 @@ public interface UserRepository {
 
     List<String> getHistoryOfUserEmails(User user);
 
-    void activatePremium(User user) throws ParseException;
+    User activatePremium(User user) throws ParseException;
 
     Premium getPremiumDetails(User user) throws Exception;
 

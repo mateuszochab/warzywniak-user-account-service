@@ -1,12 +1,16 @@
 package com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 
 @Setter
 @Getter
+@ToString
+@AllArgsConstructor
 public class Premium {
 
 

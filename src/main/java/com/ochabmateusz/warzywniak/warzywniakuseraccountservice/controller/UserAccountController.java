@@ -1,6 +1,7 @@
 package com.ochabmateusz.warzywniak.warzywniakuseraccountservice.controller;
 
 
+import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.DTO.UserDTO;
 import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity.Premium;
 import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity.TypeOfProduct;
 import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.entity.User;
@@ -9,12 +10,15 @@ import com.ochabmateusz.warzywniak.warzywniakuseraccountservice.repository.Valid
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 @RestController
 public class UserAccountController {
@@ -33,55 +37,58 @@ public class UserAccountController {
     }
 
 
-    //TODO take care of confirmation code when service storing confirmation code with be available
+    //TODO take care of confirmation code when service storing confirmation code will be available
     @PatchMapping(value = "/confirmUser", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "User has been successfully confirmed")
+    @ResponseStatus(value = HttpStatus.OK, reason = "User has been successfully confirmed")
     public void confirmUser(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 //Fields
         String id;
         String confirmationCode;
 
 //check out if data from request are valid
-        if (requestBody.containsKey("id") && requestBody.containsKey("confirmationCode")) {
+        if (this.validationRepository.twoValidItemsInRequest("id","confirmationCode",requestBody)){
             id = (String) requestBody.get("id");
             confirmationCode = (String) requestBody.get("confirmationCode");
-        } else {
-            throw new NoSuchFieldException("request does not contains required fields");
-        }
-//find user in Database
-        User user = this.userRepository.returnUserFromDb(id);
-        //confirm and save user in DB
-        if (!user.isConfirmed()) {
-            this.userRepository.saveUserInDb(this.userRepository.confirmUserAndReturn(user));
+
+
+            //find user in Database
+            User user = this.userRepository.returnUserFromDb(id);
+
+            //confirm and save user in DB
+            if (!user.isConfirmed()) {
+                this.userRepository.saveUserInDb(this.userRepository.confirmUserAndReturn(user));
+            }else{
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "User Already Confirmed");
+            }
         }
     }
 
 
     @PatchMapping(value = "/changeName", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "Username has been succesfully changed")
-    public void changeName(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
-
+    @ResponseStatus(value = HttpStatus.OK, reason = "Username has been successfully changed")
+    public void changeName(@RequestBody Map<String, Object> requestBody) throws NotFoundException {
+//local variables
         String id;
         String name;
 
         //check out if data from request are valid
-        if (requestBody.containsKey("id") && requestBody.containsKey("name")) {
+        if (this.validationRepository.twoValidItemsInRequest("id", "name", requestBody)) {
             id = (String) requestBody.get("id");
             name = (String) requestBody.get("name");
-        } else {
-            throw new NoSuchFieldException("request does not contains required fields");
+
+
+            //return user From Database
+            User user = this.userRepository.returnUserFromDb(id);
+
+//change username and save user in database
+            this.userRepository.saveUserInDb(this.userRepository.changeUsername(user, name));
         }
-
-        User user = this.userRepository.returnUserFromDb(id);
-
-
-        this.userRepository.saveUserInDb(this.userRepository.changeUsername(user, name));
     }
 
 
     @PatchMapping(value = "/changePassword", headers = ACCEPT_JSON)
     @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "password has been succesfully changed")
-    public void changePassword(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
+    public void changePassword(@RequestBody Map<String, Object> requestBody) throws NotFoundException {
 
         String id, password;
 
@@ -111,6 +118,7 @@ public class UserAccountController {
         }
     }
 
+    //TODO ISSUE nie przekazuje parametru enum
     @PostMapping(value = "/addProductType", headers = ACCEPT_JSON)
     @ResponseStatus(value = HttpStatus.CREATED, reason = "product type has been successfully added")
     public void addProductType(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
@@ -126,8 +134,9 @@ public class UserAccountController {
         }
     }
 
+    //TODO ISSUE zadziale pewnie po poprawie /addproductType
     @GetMapping(value = "/getProductTypes", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "product types found and returned")
+    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "product types not found and ")
     public List<TypeOfProduct> getProductTypes(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 
         String id;
@@ -160,20 +169,19 @@ public class UserAccountController {
 
 
     @GetMapping(value = "/getActiveEmail", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "Active email returned")
-    public String getActiveEmail(@RequestBody Map<String, Object> requestBody) throws Exception {
+    public Map<String, String> getActiveEmail(@RequestBody Map<String, Object> requestBody) throws Exception {
 
-        String id;
+        String id, returnEmail = null;
 
         if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
-
             id = (String) requestBody.get("id");
+            User user = this.userRepository.returnUserFromDb(id);
+            returnEmail = this.userRepository.getActiveEmail(user);
 
-            return this.userRepository.getActiveEmail(id);
         }
 
 
-        return null;
+        return Map.of("email", returnEmail);
     }
 
 
@@ -224,15 +232,15 @@ public class UserAccountController {
 
             User user = this.userRepository.returnUserFromDb(id);
 
-            user = this.userRepository.confirmEmail(user, email);
-            this.userRepository.saveUserInDb(user);
+            User user1 = this.userRepository.confirmEmail(user, email);
+            this.userRepository.saveUserInDb(user1);
         }
 
 
     }
 
     @GetMapping(value = "/getHistoryOfEmails", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "User Emails has been successfully returned")
+    //@ResponseStatus(value = HttpStatus.OK, reason = "User Emails has been successfully returned")
     public List<String> getHistoryOfEmails(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 
 
@@ -256,13 +264,13 @@ public class UserAccountController {
         if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
             String id = (String) requestBody.get("id");
             User user = this.userRepository.returnUserFromDb(id);
-            this.userRepository.activatePremium(user);
+            this.userRepository.saveUserInDb(this.userRepository.activatePremium(user));
         }
     }
 
 
     @GetMapping(value = "getPremiumDetails", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "Premium details has been returned")
+    // @ResponseStatus(value = HttpStatus.OK, reason = "Premium details has been returned")
     public Premium getPremiumDetails(@RequestBody Map<String, Object> requestBody) throws Exception {
 
 
@@ -281,18 +289,16 @@ public class UserAccountController {
 
 
     @GetMapping(value = "/getPremiumEndsTime", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "Premium end date successfully returned")
-    public String getPremiumEndsTime(Map<String, Object> requestBody) throws Exception {
+    // @ResponseStatus(value = HttpStatus.OK, reason = "Premium end date successfully returned")
+    public String getPremiumEndsTime(@RequestBody Map<String, Object> requestBody) throws Exception {
 
         if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
 
-
             String id = (String) requestBody.get("id");
+            User user = this.userRepository.returnUserFromDb(id);
 
+            return this.userRepository.getPremiumEndsDate(this.userRepository.getPremiumDetails(user));
 
-            return this.userRepository.getPremiumEndsDate(this.userRepository.getPremiumDetails(
-                    this.userRepository.returnUserFromDb(id))
-            );
         }
 
         return null;
@@ -301,15 +307,17 @@ public class UserAccountController {
 
 
     @GetMapping(value = "/findUserByEmail", headers = ACCEPT_JSON)
-    @ResponseStatus(value = HttpStatus.OK, reason = "User found by email")
-    public User findUserByEmail(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
+    //@ResponseStatus(value = HttpStatus.OK, reason = "User found by email")
+    public UserDTO findUserByEmail(@RequestBody Map<String, Object> requestBody) throws NoSuchFieldException, NotFoundException {
 
 
         if (this.validationRepository.oneValidItemsInRequest("email", requestBody)) {
 
             String email = (String) requestBody.get("email");
 
-            return this.userRepository.findUserByEmail(email);
+            User user = this.userRepository.findUserByEmail(email);
+            UserDTO userDTO = new UserDTO(user);
+            return userDTO;
         }
 
         return null;
@@ -327,9 +335,10 @@ public class UserAccountController {
 
 
             return this.userRepository.getUserFriendList(this.userRepository.returnUserFromDb(id));
+        } else {
+            throw new NoSuchFieldException("request does not contains required field");
         }
 
-        return null;
     }
 
     public void confirmFriendRequest(@RequestBody Map<String, Object> requestBody) {
