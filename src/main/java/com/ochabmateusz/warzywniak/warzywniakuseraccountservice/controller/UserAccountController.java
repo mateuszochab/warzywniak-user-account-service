@@ -434,8 +434,6 @@ public class UserAccountController {
     public Set<String> getConversationsList(@RequestBody Map<String, Object> requestBody) throws Exception {
 
         if (this.validationRepository.oneValidItemsInRequest("id", requestBody)) {
-
-
             String id = (String) requestBody.get("id");
 
 

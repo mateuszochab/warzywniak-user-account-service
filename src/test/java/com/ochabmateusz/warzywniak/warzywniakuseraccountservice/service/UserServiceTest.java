@@ -29,6 +29,21 @@ class UserServiceTest {
     private UserBase userBase;
 
 
+    private final String userName="Frank";
+    private final String userPassword="Pigeon12345";
+    private final String userNickname="Frankbank";
+    private final String userCompanyName="xxx";
+    private final String userCity="krakow";
+    private final String userStreet="mainStreet";
+    private final String userId="1234567890";
+    private final String userStarDatePremium="startdatePremium";
+    private final String userCreatedDate="createdDate";
+    private final String userEndDatePremium="";
+
+
+
+
+
     @InjectMocks
     UserService userService;
 
@@ -39,10 +54,10 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
 
-        userBase = new UserBase("Mateusz", "mateusz11123", "bazinga", "xxx", new UserEmail(),
-                new Location("krakow", new Coordinates("12.432", "13.356"), "mainStreet", 12));
-        user = new User("aaa", userBase, false, false, Role.FREE, new Premium(false, "startdate", ""),
-                new ArrayList<>(), new HashMap<>(), new HashMap<>(), new ArrayList<>(), "createdDate", new ArrayList<>(), new ArrayList<>(), new HashSet<>(), new ArrayList<>());
+        userBase = new UserBase(userName, userPassword, userNickname, userCompanyName, new UserEmail(),
+                new Location(userCity, new Coordinates("12.432", "13.356"), userStreet, 12));
+        user = new User(userId, userBase, false, false, Role.FREE, new Premium(false, userStarDatePremium, userEndDatePremium),
+                new ArrayList<>(), new HashMap<>(), new HashMap<>(), new ArrayList<>(), userCreatedDate, new ArrayList<>(), new ArrayList<>(), new HashSet<>(), new ArrayList<>());
 
 
     }
@@ -59,25 +74,25 @@ class UserServiceTest {
     void returnUserFromDb() throws NotFoundException {
 
         user.setConfirmed(true);
-        when(wuserMongoRepository.findById("aaa")).thenReturn(java.util.Optional.ofNullable(user));
+        when(wuserMongoRepository.findById(userId)).thenReturn(java.util.Optional.ofNullable(user));
 
 
-        User user1 = userService.returnUserFromDb("aaa");
+        User user1 = userService.returnUserFromDb(userId);
 
 
         assertTrue(user1.isConfirmed());
-        assertEquals("Mateusz", user1.getUserBase().getName());
+        assertEquals(userName, user1.getUserBase().getName());
         assertFalse(user1.isSuperUser());
     }
 
     @Test
     void returnUserFromDb_ReturnsNullShouldThrowException() {
 
-        when(wuserMongoRepository.findById("aaa")).thenReturn(java.util.Optional.ofNullable(null));
+        when(wuserMongoRepository.findById(userId)).thenReturn(java.util.Optional.ofNullable(null));
 
         ResponseStatusException responseStatusException = assertThrows(ResponseStatusException.class,
                 () -> {
-                    userService.returnUserFromDb("aaa");
+                    userService.returnUserFromDb(userId);
                 }
         );
 
@@ -107,7 +122,7 @@ class UserServiceTest {
     @Test
     void changeUsername(){
 //asserts for input object
-        assertEquals("Mateusz",user.getUserBase().getName());
+        assertEquals(userName,user.getUserBase().getName());
         assertEquals(0, user.getModifiedDates().size());
 
 //call tested method
@@ -122,8 +137,26 @@ class UserServiceTest {
         assertFalse( list.get(0).getModifiedDate().isEmpty());
     }
 
+    @Test
+    void changePassword(){
+
+        //asserts for input object
+        assertTrue(UserBase.passwordEncoder().matches(this.userPassword,user.getUserBase().getPassword()));
 
 
-    
+//call tested method
+        User userLocal = this.userService.changePassword(this.user,"Tom123");
+
+        assertTrue(UserBase.passwordEncoder().matches("Tom123",userLocal.getUserBase().getPassword()));
+        List<ModifiedDate> list = userLocal.getModifiedDates();
+        assertEquals(1, list.size());
+        assertEquals(ModificationType.PASSWORD, list.get(0).getModificationType());
+        assertFalse( list.get(0).getModifiedDate().isEmpty());
+
+    }
+
+
+
+
 
 }

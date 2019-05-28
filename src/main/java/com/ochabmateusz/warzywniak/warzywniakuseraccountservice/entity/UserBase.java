@@ -71,7 +71,7 @@ public class UserBase {
 
     public UserBase(@NotNull @NotEmpty @Size(min = 2, message = "field Name is expected to contains atleast 2 characters") @Pattern(regexp = "^[a-zA-Z]*$", message = "Accept only lowercase, upperacase characters") String name, @NotNull @NotEmpty @Size(min = 8, message = "Password should have atleast 8 characters") @Pattern(regexp = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$", message = "atleast one uppercase, one lowercase character and one number") String password, @NotNull @NotEmpty @Size(min = 5, message = "Username should have atleast 5 characters") @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "Accept only alphanumeric values") String nickname, @Size(min = 1, max = 80, message = "Name of company cannot be longer than 80 characters") String companyName, @Valid UserEmail userEmail, @Valid Location location) {
         this.name = name;
-        this.password = password;
+        this.password = passwordEncoder().encode(password);
         this.nickname = nickname;
         this.companyName = companyName;
         this.typeOfProduct = new ArrayList<>();
@@ -84,7 +84,7 @@ public class UserBase {
     }
 
 
-    public PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

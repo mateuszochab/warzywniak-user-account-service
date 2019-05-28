@@ -34,7 +34,7 @@ public class UserService implements UserRepository {
         if (user.isPresent()) {
             return user.get();
         } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User Not Found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
 
         }
     }
@@ -98,7 +98,7 @@ public class UserService implements UserRepository {
             user.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.REMOVE_PRODUCT_TYPE));
 
         } else {
-            throw new Exception("Could not find product type on product list");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not remove specific product type -reason: No product type on the list");
         }
 
         return user;
@@ -116,8 +116,8 @@ public class UserService implements UserRepository {
     public String getActiveEmail(User user) throws Exception {
 
         String activeEmail = user.getUserBase().getUserEmail().getActiveEmail();
-        if (activeEmail==null) {
-            throw new Exception("There is no active email");
+        if (activeEmail == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not return active email -reason:There is no email address which is set as active for this user");
         }
 
 
@@ -140,7 +140,7 @@ public class UserService implements UserRepository {
             user.getModifiedDates().add(new ModifiedDate(setDate(), ModificationType.WAITING_EMAIL_REMOVED));
             return user;
         } else {
-            throw new Exception("could not remove email -reason: waiting email and passed email to remove are not same ");
+            throw new Exception("Could not remove email -reason: waiting email and passed email to remove are not same ");
         }
 
     }
@@ -148,7 +148,7 @@ public class UserService implements UserRepository {
     @Override
     public User confirmEmail(User user, String email) throws Exception {
 
-        String activeEmail=user.getUserBase().getUserEmail().getActiveEmail();
+        String activeEmail = user.getUserBase().getUserEmail().getActiveEmail();
 
 
         if (user.getUserBase().getUserEmail().getWaitingEmail().equals(email)) {
@@ -160,7 +160,7 @@ public class UserService implements UserRepository {
             return user;
 
         } else {
-            throw new Exception("could not confirm email -reason: email waiting for confirmation and email sent to be confirmed are not the same ");
+            throw new Exception("Could not confirm email -reason: email waiting for confirmation and email sent to be confirmed are not the same ");
         }
     }
 
@@ -172,12 +172,21 @@ public class UserService implements UserRepository {
     @Override
     public User activatePremium(User user) throws ParseException {
 
-        String startDate = setDate();
 
-        user.getPremium().setActive(true);
-        user.getPremium().setStartDatePremium(startDate);
-        user.getPremium().setEndDatePremium(calculateDateOfPremiumEnd(startDate, 30));
-        return user;
+        String startDate = setDate();
+        if ((user.getPremium().isActive() &&
+                stringDateToDateObject(getPremiumEndsDate(user.getPremium()))
+                        .before(stringDateToDateObject(startDate))) ||
+                !user.getPremium().isActive()) {
+
+            user.getPremium().setActive(true);
+            user.getPremium().setStartDatePremium(startDate);
+            user.getPremium().setEndDatePremium(calculateDateOfPremiumEnd(startDate, 30));
+            return user;
+        } else {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Could not Activate User -reason: user is already activated");
+        }
     }
 
     @Override
@@ -187,14 +196,19 @@ public class UserService implements UserRepository {
         if (premium.isActive()) {
             return premium;
         } else {
-
             throw new Exception("User is not premium User");
         }
     }
 
     @Override
     public String getPremiumEndsDate(Premium premiumDetails) {
-        return premiumDetails.getEndDatePremium();
+         String enddate=premiumDetails.getEndDatePremium();
+         if(!enddate.isBlank()&&!premiumDetails.isActive()){
+             return enddate;
+         }else{
+             throw new ResponseStatusException(HttpStatus.CONFLICT,
+                     "Could not return Date Of Premium Ending -reason: user is not Premium");
+         }
     }
 
     @Override
@@ -203,7 +217,7 @@ public class UserService implements UserRepository {
         if (user.isPresent()) {
             return user.get();
         } else {
-            throw new NotFoundException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
         }
     }
 

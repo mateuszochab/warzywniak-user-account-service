@@ -18,3 +18,5 @@ public class WarzywniakUserAccountServiceApplication {
 	}
 
 }
+//TODO to finish service: admin controller, finish units tests, add integration tests,
+//TODO connect service to config server, discovery, cache database, tracing server
